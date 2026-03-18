@@ -4,58 +4,100 @@ use std::path::PathBuf;
 const HOOK_MARKER: &str = "# >>> devenv hook >>>";
 const HOOK_MARKER_END: &str = "# <<< devenv hook <<<";
 
-/// ~/.devenv/active.sh — the file that shell sources
+/// ~/.devenv/ directory
 fn devenv_dir() -> Option<PathBuf> {
     Some(dirs::home_dir()?.join(".devenv"))
 }
 
-fn active_sh_path() -> Option<PathBuf> {
-    Some(devenv_dir()?.join("active.sh"))
-}
-
-fn get_shell_config_path() -> Option<(PathBuf, String)> {
-    let home = dirs::home_dir()?;
-    let shell = std::env::var("SHELL").unwrap_or_default();
-
-    if shell.contains("zsh") {
-        Some((home.join(".zshrc"), "zsh".to_string()))
-    } else if shell.contains("bash") {
-        let bashrc = home.join(".bashrc");
-        let profile = home.join(".bash_profile");
-        if bashrc.exists() {
-            Some((bashrc, "bash".to_string()))
-        } else {
-            Some((profile, "bash".to_string()))
-        }
+/// Active profile script path (platform-specific)
+fn active_script_path() -> Option<PathBuf> {
+    let dir = devenv_dir()?;
+    if cfg!(windows) {
+        Some(dir.join("active.ps1"))
     } else {
-        Some((home.join(".zshrc"), "zsh".to_string()))
+        Some(dir.join("active.sh"))
     }
 }
 
-fn build_hook_block() -> String {
-    let active_path = active_sh_path()
-        .map(|p| p.to_string_lossy().to_string())
-        .unwrap_or_else(|| "$HOME/.devenv/active.sh".to_string());
+/// Get shell config path and shell name
+fn get_shell_config_path() -> Option<(PathBuf, String)> {
+    let home = dirs::home_dir()?;
 
-    format!(
-        r#"{marker}
-[ -f "{path}" ] && source "{path}"
-{marker_end}"#,
-        marker = HOOK_MARKER,
-        path = active_path,
-        marker_end = HOOK_MARKER_END,
-    )
+    if cfg!(windows) {
+        // PowerShell profile: ~\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
+        // or legacy: ~\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+        let docs = home.join("Documents");
+        let ps_core = docs.join("PowerShell").join("Microsoft.PowerShell_profile.ps1");
+        let ps_legacy = docs.join("WindowsPowerShell").join("Microsoft.PowerShell_profile.ps1");
+
+        if ps_core.exists() {
+            Some((ps_core, "powershell".to_string()))
+        } else if ps_legacy.exists() {
+            Some((ps_legacy, "powershell".to_string()))
+        } else {
+            // Default to PowerShell Core path, create parent dirs later
+            Some((ps_core, "powershell".to_string()))
+        }
+    } else {
+        let shell = std::env::var("SHELL").unwrap_or_default();
+        if shell.contains("zsh") {
+            Some((home.join(".zshrc"), "zsh".to_string()))
+        } else if shell.contains("bash") {
+            let bashrc = home.join(".bashrc");
+            let profile = home.join(".bash_profile");
+            if bashrc.exists() {
+                Some((bashrc, "bash".to_string()))
+            } else {
+                Some((profile, "bash".to_string()))
+            }
+        } else {
+            Some((home.join(".zshrc"), "zsh".to_string()))
+        }
+    }
 }
 
-/// Ensure ~/.devenv/ exists and write active.sh
+/// Build the hook block to inject into shell config
+fn build_hook_block() -> String {
+    let active_path = active_script_path()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
+
+    if cfg!(windows) {
+        // PowerShell hook
+        format!(
+            r#"{marker}
+if (Test-Path "{path}") {{ . "{path}" }}
+{marker_end}"#,
+            marker = HOOK_MARKER,
+            path = active_path,
+            marker_end = HOOK_MARKER_END,
+        )
+    } else {
+        // Bash/Zsh hook
+        format!(
+            r#"{marker}
+[ -f "{path}" ] && source "{path}"
+{marker_end}"#,
+            marker = HOOK_MARKER,
+            path = active_path,
+            marker_end = HOOK_MARKER_END,
+        )
+    }
+}
+
+/// Ensure ~/.devenv/ exists and create placeholder active script
 fn ensure_devenv_dir() -> Result<(), String> {
     let dir = devenv_dir().ok_or("Cannot detect home directory")?;
     fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
 
-    let active = dir.join("active.sh");
+    let active = active_script_path().ok_or("Cannot detect home directory")?;
     if !active.exists() {
-        fs::write(&active, "# DevEnv active profile — managed by DevEnv app\n")
-            .map_err(|e| e.to_string())?;
+        let header = if cfg!(windows) {
+            "# DevEnv active profile — managed by DevEnv app\n"
+        } else {
+            "# DevEnv active profile — managed by DevEnv app\n"
+        };
+        fs::write(&active, header).map_err(|e| e.to_string())?;
     }
     Ok(())
 }
@@ -85,6 +127,11 @@ fn install_shell_hook() -> Result<serde_json::Value, String> {
 
     let (config_path, _shell) = get_shell_config_path()
         .ok_or("Cannot detect home directory")?;
+
+    // Ensure parent directory exists (for PowerShell profile)
+    if let Some(parent) = config_path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
 
     let content = if config_path.exists() {
         fs::read_to_string(&config_path).map_err(|e| e.to_string())?
@@ -154,16 +201,21 @@ fn uninstall_shell_hook() -> Result<serde_json::Value, String> {
     Ok(serde_json::json!({ "success": true }))
 }
 
-/// Write the active profile's env vars to ~/.devenv/active.sh
+/// Write the active profile's env vars to the active script
 #[tauri::command]
 fn write_active_profile(vars: Vec<serde_json::Value>) -> Result<(), String> {
     ensure_devenv_dir()?;
 
-    let active = active_sh_path().ok_or("Cannot detect home directory")?;
-    let mut content = String::from("# DevEnv active profile — managed by DevEnv app\n");
-    content.push_str("# Do not edit manually, changes will be overwritten.\n\n");
+    let dir = devenv_dir().ok_or("Cannot detect home directory")?;
 
-    for var in vars {
+    // Always write both formats so cross-platform shells (e.g. Git Bash on Windows) work
+    let mut sh_content = String::from("# DevEnv active profile — managed by DevEnv app\n");
+    sh_content.push_str("# Do not edit manually, changes will be overwritten.\n\n");
+
+    let mut ps_content = String::from("# DevEnv active profile — managed by DevEnv app\n");
+    ps_content.push_str("# Do not edit manually, changes will be overwritten.\n\n");
+
+    for var in &vars {
         let enabled = var["enabled"].as_bool().unwrap_or(false);
         let key = var["key"].as_str().unwrap_or("");
         let value = var["value"].as_str().unwrap_or("");
@@ -172,12 +224,18 @@ fn write_active_profile(vars: Vec<serde_json::Value>) -> Result<(), String> {
             continue;
         }
 
-        // Escape single quotes in value
-        let escaped = value.replace('\'', "'\\''");
-        content.push_str(&format!("export {}='{}'\n", key, escaped));
+        // Shell format: export KEY='value'
+        let sh_escaped = value.replace('\'', "'\\''");
+        sh_content.push_str(&format!("export {}='{}'\n", key, sh_escaped));
+
+        // PowerShell format: $env:KEY = "value"
+        let ps_escaped = value.replace('"', "`\"");
+        ps_content.push_str(&format!("$env:{} = \"{}\"\n", key, ps_escaped));
     }
 
-    fs::write(&active, content).map_err(|e| e.to_string())?;
+    fs::write(dir.join("active.sh"), sh_content).map_err(|e| e.to_string())?;
+    fs::write(dir.join("active.ps1"), ps_content).map_err(|e| e.to_string())?;
+
     Ok(())
 }
 
@@ -192,12 +250,15 @@ fn get_system_locale() -> String {
     }
 }
 
-/// Clear ~/.devenv/active.sh when no profile is active
+/// Clear active profile scripts
 #[tauri::command]
 fn clear_active_profile() -> Result<(), String> {
     ensure_devenv_dir()?;
-    let active = active_sh_path().ok_or("Cannot detect home directory")?;
-    fs::write(&active, "# DevEnv — no active profile\n").map_err(|e| e.to_string())?;
+    let dir = devenv_dir().ok_or("Cannot detect home directory")?;
+    fs::write(dir.join("active.sh"), "# DevEnv — no active profile\n")
+        .map_err(|e| e.to_string())?;
+    fs::write(dir.join("active.ps1"), "# DevEnv — no active profile\n")
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 

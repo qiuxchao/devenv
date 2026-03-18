@@ -152,7 +152,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 {t("onboarding.hook.writtenTo")} {hookInfo.configPath}
               </p>
               <code className="block text-xs font-mono text-foreground">
-                [ -f ~/.devenv/active.sh ] && source ~/.devenv/active.sh
+                {hookInfo.shell === "powershell"
+                  ? 'if (Test-Path "~/.devenv/active.ps1") { . "~/.devenv/active.ps1" }'
+                  : '[ -f ~/.devenv/active.sh ] && source ~/.devenv/active.sh'}
               </code>
             </div>
             <p className="text-xs text-muted-foreground">

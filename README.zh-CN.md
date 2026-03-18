@@ -26,19 +26,25 @@
 从 [GitHub Releases](https://github.com/qiuxchao/devenv/releases) 下载对应平台安装包：
 
 - **macOS**：`.dmg`（支持 Apple Silicon 和 Intel）
-- **Windows**：`.msi` / `.exe`
+- **Windows**：`.msi` / `.nsis`
 - **Linux**：`.deb` / `.AppImage`
 
-或通过 Homebrew 安装（macOS）：
+### macOS："应用已损坏"解决方法
+
+由于应用未进行 Apple 开发者签名，macOS 可能会阻止打开。安装后在终端执行：
 
 ```bash
-brew install --cask devenv
+xattr -cr /Applications/devenv.app
 ```
+
+然后正常打开即可。
 
 ## 工作原理
 
 1. 在 GUI 中创建并编辑环境变量 Profile
-2. 激活的配置自动写入 `~/.devenv/active.sh`
+2. 激活的配置自动写入：
+   - **macOS / Linux**：`~/.devenv/active.sh`
+   - **Windows**：`~/.devenv/active.ps1`
 3. Shell 启动时 source 该文件，环境变量即时生效
 
 ## 技术栈
