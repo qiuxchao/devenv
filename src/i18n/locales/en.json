@@ -1,0 +1,72 @@
+{
+  "app.name": "DevEnv",
+
+  "sidebar.guide": "User Guide",
+  "sidebar.settings": "Settings",
+
+  "profile.activate": "Activate",
+  "profile.active": "Active",
+  "profile.envVars": "Environment Variables",
+  "profile.addVar": "Add Variable",
+  "profile.noVars": "No variables yet. Click \"Add Variable\" to get started.",
+  "profile.table.on": "On",
+  "profile.table.key": "Key",
+  "profile.table.value": "Value",
+  "profile.newName": "New Profile",
+  "profile.newDesc": "Click to configure",
+
+  "settings.title": "Settings",
+  "settings.language": "Language",
+  "settings.theme": "Theme",
+  "settings.lang.system": "System",
+  "settings.lang.zh": "中文",
+  "settings.lang.en": "English",
+  "settings.theme.system": "System",
+  "settings.theme.light": "Light",
+  "settings.theme.dark": "Dark",
+
+  "onboarding.step1.title": "Welcome to DevEnv",
+  "onboarding.step1.desc": "Manage your dev environment config in one place. No more hand-editing .bashrc.",
+  "onboarding.step1.d1": "Visual environment variable management",
+  "onboarding.step1.d2": "Switch dev contexts in one click",
+  "onboarding.step1.d3": "Proxy, runtime versions, PATH — all in one place",
+
+  "onboarding.step2.title": "Create a Profile",
+  "onboarding.step2.desc": "A Profile is a collection of environment variables. Create different profiles for different work scenarios.",
+  "onboarding.step2.d1": "Click the + button at the top of the sidebar to create a new Profile",
+  "onboarding.step2.d2": "e.g. \"Work - Backend\" with Java + proxy",
+  "onboarding.step2.d3": "\"Personal\" with Go + latest Node",
+
+  "onboarding.step3.title": "Manage Variables",
+  "onboarding.step3.desc": "Add, edit, and delete environment variables in the right panel.",
+  "onboarding.step3.d1": "Click \"Add Variable\" to add a new one",
+  "onboarding.step3.d2": "Enter key and value, e.g. JAVA_HOME=/opt/jdk-17",
+  "onboarding.step3.d3": "Use the toggle to enable/disable individual variables",
+
+  "onboarding.step4.title": "Activate a Profile",
+  "onboarding.step4.desc": "Select a Profile and click Activate to enable it.",
+  "onboarding.step4.d1": "Only one Profile can be active at a time",
+  "onboarding.step4.d2": "Active profiles show a green dot and Active badge",
+  "onboarding.step4.d3": "Double-click a profile in the sidebar to quickly activate it",
+
+  "onboarding.step5.title": "Terminal Integration",
+  "onboarding.step5.desc": "DevEnv needs to inject a source command into your shell config so new terminals automatically load the active profile.",
+
+  "onboarding.prev": "Previous",
+  "onboarding.next": "Next",
+  "onboarding.skip": "Skip",
+  "onboarding.skipLater": "Later",
+  "onboarding.start": "Get Started",
+
+  "onboarding.hook.checking": "Detecting shell configuration...",
+  "onboarding.hook.detected": "Detected shell:",
+  "onboarding.hook.configAt": "Config file:",
+  "onboarding.hook.clickToInject": "Click the button below to automatically append the hook to your shell config.",
+  "onboarding.hook.inject": "Install Shell Hook",
+  "onboarding.hook.writing": "Writing configuration...",
+  "onboarding.hook.done": "Shell Hook configured",
+  "onboarding.hook.writtenTo": "Written to",
+  "onboarding.hook.restart": "Open a new terminal to apply changes.",
+  "onboarding.hook.error": "Configuration failed: ",
+  "onboarding.hook.retry": "Retry"
+}

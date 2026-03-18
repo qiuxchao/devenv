@@ -1,0 +1,72 @@
+{
+  "app.name": "DevEnv",
+
+  "sidebar.guide": "使用引导",
+  "sidebar.settings": "设置",
+
+  "profile.activate": "激活",
+  "profile.active": "已激活",
+  "profile.envVars": "环境变量",
+  "profile.addVar": "添加变量",
+  "profile.noVars": "暂无变量，点击「添加变量」开始配置。",
+  "profile.table.on": "启用",
+  "profile.table.key": "变量名",
+  "profile.table.value": "值",
+  "profile.newName": "新建 Profile",
+  "profile.newDesc": "点击配置",
+
+  "settings.title": "设置",
+  "settings.language": "语言",
+  "settings.theme": "主题",
+  "settings.lang.system": "跟随系统",
+  "settings.lang.zh": "中文",
+  "settings.lang.en": "English",
+  "settings.theme.system": "跟随系统",
+  "settings.theme.light": "浅色",
+  "settings.theme.dark": "深色",
+
+  "onboarding.step1.title": "欢迎使用 DevEnv",
+  "onboarding.step1.desc": "一站式管理你的开发环境配置，告别手动编辑 .bashrc 的痛苦。",
+  "onboarding.step1.d1": "可视化管理环境变量",
+  "onboarding.step1.d2": "一键切换不同开发场景",
+  "onboarding.step1.d3": "支持代理、版本、PATH 等全套配置",
+
+  "onboarding.step2.title": "创建 Profile",
+  "onboarding.step2.desc": "Profile 是一组环境变量的集合。你可以为不同的工作场景创建不同的 Profile。",
+  "onboarding.step2.d1": "点击左侧栏顶部的 + 按钮创建新 Profile",
+  "onboarding.step2.d2": "例如：\"Work - Backend\" 配置 Java + 代理",
+  "onboarding.step2.d3": "\"Personal\" 配置 Go + Node 最新版",
+
+  "onboarding.step3.title": "管理环境变量",
+  "onboarding.step3.desc": "在右侧面板中添加、编辑、删除环境变量。",
+  "onboarding.step3.d1": "点击「添加变量」添加新变量",
+  "onboarding.step3.d2": "输入变量名和值，如 JAVA_HOME=/opt/jdk-17",
+  "onboarding.step3.d3": "用开关控制单个变量的启用/禁用",
+
+  "onboarding.step4.title": "激活 Profile",
+  "onboarding.step4.desc": "选中一个 Profile 后，点击激活按钮启用它。",
+  "onboarding.step4.d1": "同一时间只有一个 Profile 处于激活状态",
+  "onboarding.step4.d2": "激活后，左侧会显示绿色圆点和激活标签",
+  "onboarding.step4.d3": "也可以双击左侧列表项快速激活",
+
+  "onboarding.step5.title": "配置终端集成",
+  "onboarding.step5.desc": "DevEnv 需要在你的 Shell 配置中注入一行 source 命令，让新终端自动加载激活的环境变量。",
+
+  "onboarding.prev": "上一步",
+  "onboarding.next": "下一步",
+  "onboarding.skip": "跳过",
+  "onboarding.skipLater": "稍后配置",
+  "onboarding.start": "开始使用",
+
+  "onboarding.hook.checking": "正在检测 Shell 配置...",
+  "onboarding.hook.detected": "检测到你使用的是",
+  "onboarding.hook.configAt": "配置文件位于：",
+  "onboarding.hook.clickToInject": "点击下方按钮，自动在配置文件末尾追加 hook 代码。",
+  "onboarding.hook.inject": "一键注入 Shell Hook",
+  "onboarding.hook.writing": "正在写入配置...",
+  "onboarding.hook.done": "Shell Hook 已配置",
+  "onboarding.hook.writtenTo": "已写入",
+  "onboarding.hook.restart": "重新打开终端后即可生效。",
+  "onboarding.hook.error": "配置失败：",
+  "onboarding.hook.retry": "重试"
+}
